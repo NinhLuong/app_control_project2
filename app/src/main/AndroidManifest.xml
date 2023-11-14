@@ -15,7 +15,6 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.AppControl"
         tools:targetApi="31">
-        <service android:name=".PowerStatusService" />
         <activity
             android:name=".MainActivity"
             android:exported="true">

@@ -69,19 +69,11 @@ class PowerStatusService : Service() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        val intent = Intent(applicationContext, MainActivity::class.java)
-        val pendingIntent = PendingIntent.getActivity(
-            applicationContext,
-            0,
-            intent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-        )
         val notificationBuilder = NotificationCompat.Builder(applicationContext, notificationChannelId)
             .setContentTitle("Power Status")
-            .setContentText("Power status is disconnected")
+            .setContentText("Checking power status...")
             .setSmallIcon(R.drawable.error)
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-            .setContentIntent(pendingIntent)
 
         startForeground(powerStatusNotificationId, notificationBuilder.build())
         powerRef.addValueEventListener(object : ValueEventListener {
@@ -90,14 +82,25 @@ class PowerStatusService : Service() {
                 val powerStatus = snapshot.getValue<String>()
                 Log.d("value_powerStatus", "Value is: $powerStatus")
                 if (powerStatus == "true") {
-
-                    notificationBuilder.setContentText("Power status is disconnected connected")
+                    val intent = Intent(applicationContext, MainActivity::class.java)
+                    val pendingIntent = PendingIntent.getActivity(
+                        applicationContext,
+                        0,
+                        intent,
+                        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+                    )
+                    val notificationBuilder = NotificationCompat.Builder(applicationContext, notificationChannelId)
+                        .setContentTitle("Power Status")
+                        .setContentText("Power status is disconnected")
+                        .setSmallIcon(R.drawable.error)
+                        .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                        .setContentIntent(pendingIntent)
                     notificationManager.notify(powerStatusNotificationId, notificationBuilder.build())
 
                     if (!ringtone.isPlaying) {
                         ringtone.play()
                     }
-                }else if (powerStatus == "false") {
+                }else {
                     notificationBuilder.setContentText("Power status is connected")
                     notificationManager.notify(powerStatusNotificationId, notificationBuilder.build())
 
@@ -105,6 +108,7 @@ class PowerStatusService : Service() {
                         ringtone.stop()
                     }
                 }
+
             }
 
             override fun onCancelled(error: DatabaseError) {
@@ -505,6 +509,14 @@ class GardenFragment : Fragment() {
                 // Handle error
             }
         })
+
+        val intent = Intent(context, PowerStatusService::class.java)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            context?.startForegroundService(intent)
+        } else {
+            context?.startService(intent)
+        }
+
     }
     // Function to calculate time interval between two times
     fun calculateTimeInterval(startTime: String, endTime: String) {
@@ -571,25 +583,6 @@ class GardenFragment : Fragment() {
         super.onDestroyView()
         handler.removeCallbacks(runnableCode)
     }
-    override fun onStart() {
-        super.onStart()
-
-        val intent = Intent(context, PowerStatusService::class.java)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            context?.startForegroundService(intent)
-        } else {
-            context?.startService(intent)
-        }
-    }
-
-
-    override fun onStop() {
-        super.onStop()
-
-        val intent = Intent(context, PowerStatusService::class.java)
-        context?.stopService(intent)
-    }
-
 
 }
 
