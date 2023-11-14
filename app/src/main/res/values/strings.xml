@@ -1,0 +1,14 @@
+<resources>
+    <string name="app_name">app control</string>
+    <string name="tu_dong">Tự động</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="nav_home">Home</string>
+    <string name="nav_favor">Favorite</string>
+    <string name="nav_history">History</string>
+    <string name="nav_account">Account</string>
+    <string name="nav_pass">Password</string>
+    <string name="nav_profile">Profile</string>
+    <string name="nav_drawer_open">Open_navigation_drawer</string>
+    <string name="nav_drawer_close">Close_navigation_drawer</string>
+</resources>

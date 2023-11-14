@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <group android:id="@+id/static_group" android:checkableBehavior="single">
+        <item android:id="@+id/nav_home1" android:title="Garden 1" android:icon="@drawable/ic_home" />
+        <item android:id="@+id/nav_home2" android:title="Garden 2" android:icon="@drawable/ic_home" />
+    </group>
+    <group android:id="@+id/dynamic_group">
+        <!-- Dynamic items will be added here programmatically -->
+    </group>
+    <group android:id="@+id/add_group" android:checkableBehavior="single">
+        <item android:id="@+id/nav_add" android:title="Add Garden" android:icon="@drawable/ic_add_24" />
+    </group>
+
+    <!--<group android:id="@+id/account">
+        <item android:title="@string/nav_account">
+            <menu>
+                <item android:id="@+id/nav_profile"
+                    android:title="@string/nav_profile"
+                    android:icon="@drawable/ic_profile"/>
+
+                <item android:id="@+id/nav_pass"
+                    android:title="@string/nav_pass"
+                    android:icon="@drawable/ic_pass"/>
+            </menu>
+        </item>
+    </group>-->
+</menu>

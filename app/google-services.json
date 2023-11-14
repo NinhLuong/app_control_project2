@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "837090961939",
+    "firebase_url": "https://do-an-1-f2655-default-rtdb.asia-southeast1.firebasedatabase.app",
+    "project_id": "do-an-1-f2655",
+    "storage_bucket": "do-an-1-f2655.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:837090961939:android:9bee67c1262fddd6eaede6",
+        "android_client_info": {
+          "package_name": "com.example.appcontrol"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "837090961939-qae4p4pkmhagjq9nh1duqrdekkm1n4o5.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDxeDCkisMwhC2olL3Jxt2iJmi_0EU29xU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "837090961939-qae4p4pkmhagjq9nh1duqrdekkm1n4o5.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
