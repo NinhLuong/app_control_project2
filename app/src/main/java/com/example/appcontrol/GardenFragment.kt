@@ -1,10 +1,12 @@
 package com.example.appcontrol
 
+import android.app.AlertDialog
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.app.Service
 import android.app.TimePickerDialog
+import android.content.ContentValues.TAG
 import android.content.Context
 import android.content.Intent
 import android.graphics.Color
@@ -13,7 +15,9 @@ import android.media.RingtoneManager
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.os.Handler
 import android.os.IBinder
+import android.os.Looper
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -32,11 +36,12 @@ import com.google.firebase.database.ValueEventListener
 import com.google.firebase.database.ktx.getValue
 import java.text.SimpleDateFormat
 import java.util.Calendar
+import kotlin.math.abs
+import kotlin.properties.Delegates
 
 private lateinit var binding: FragmentGardenBinding
 
 class PowerStatusService : Service() {
-
     private lateinit var powerRef: DatabaseReference
     private lateinit var notificationManager: NotificationManager
     private lateinit var ringtone: Ringtone
@@ -49,8 +54,6 @@ class PowerStatusService : Service() {
         notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         val notificationSoundUri: Uri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM)
         ringtone = RingtoneManager.getRingtone(applicationContext, notificationSoundUri)
-
-        // Create a notification channel for Android Oreo and above
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channel = NotificationChannel(
                 notificationChannelId,
@@ -66,66 +69,48 @@ class PowerStatusService : Service() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        val intent = Intent(applicationContext, MainActivity::class.java)
+        val pendingIntent = PendingIntent.getActivity(
+            applicationContext,
+            0,
+            intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+        val notificationBuilder = NotificationCompat.Builder(applicationContext, notificationChannelId)
+            .setContentTitle("Power Status")
+            .setContentText("Power status is disconnected")
+            .setSmallIcon(R.drawable.error)
+            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+            .setContentIntent(pendingIntent)
+
+        startForeground(powerStatusNotificationId, notificationBuilder.build())
         powerRef.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 // Get the data from the snapshot
                 val powerStatus = snapshot.getValue<String>()
                 Log.d("value_powerStatus", "Value is: $powerStatus")
+                if (powerStatus == "true") {
 
-                // Update the UI based on the data
-                when (powerStatus) {
+                    notificationBuilder.setContentText("Power status is disconnected connected")
+                    notificationManager.notify(powerStatusNotificationId, notificationBuilder.build())
 
-                    "false" -> {
-                        // Update the connected UI
-                        binding.iconActiveDevices.setImageResource(R.drawable.woking_device)
-                        binding.textActiveDevices.text = "Active \nDevices"
-                        // Clear any existing notification
-                        notificationManager.cancel(powerStatusNotificationId)
-
-                        // Stop the ringtone if it's playing
-                        if (ringtone.isPlaying) {
-                            ringtone.stop()
-                        }
+                    if (!ringtone.isPlaying) {
+                        ringtone.play()
                     }
-                    "true" -> {
-                        // Update the disconnected UI
-                        binding.iconActiveDevices.setImageResource(R.drawable.error)
-                        binding.textActiveDevices.text = "Warning \nDevices"
+                }else if (powerStatus == "false") {
+                    notificationBuilder.setContentText("Power status is connected")
+                    notificationManager.notify(powerStatusNotificationId, notificationBuilder.build())
 
-                        // Create an explicit intent for the activity you want to launch
-                        val intent = Intent(applicationContext, MainActivity::class.java)
-
-                        // Create the PendingIntent with FLAG_IMMUTABLE
-                        val pendingIntent = PendingIntent.getActivity(
-                            applicationContext,
-                            0,
-                            intent,
-                            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-                        )
-                        // Create a notification
-                        val notificationBuilder = NotificationCompat.Builder(applicationContext, notificationChannelId)
-                            .setContentTitle("Power Status")
-                            .setContentText("Power status is disconnected")
-                            .setSmallIcon(R.drawable.error)
-                            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-                            .setContentIntent(pendingIntent)
-
-                        // Show the notification
-                        notificationManager.notify(powerStatusNotificationId, notificationBuilder.build())
-
-                        if (!ringtone.isPlaying) {
-                            ringtone.play()
-                        }
+                    if (ringtone.isPlaying) {
+                        ringtone.stop()
                     }
                 }
             }
 
             override fun onCancelled(error: DatabaseError) {
-                // Handle error
+                // Log a message
             }
         })
-
-        // Return START_STICKY to ensure the service keeps running even if the app is closed
         return START_STICKY
     }
 
@@ -139,21 +124,31 @@ class PowerStatusService : Service() {
     }
 }
 
+
 class GardenFragment : Fragment() {
 
     val database = FirebaseDatabase.getInstance()
     val TimeOn = database.getReference("Node1/Time/TimeOn")
     val TimeOff = database.getReference("Node1/Time/TimeOff")
-//    val lora = database.getReference("Node1/Status/Lora")
+    val ample = database.getReference("Node1/Status/Ample")
+    val flag = database.getReference("Node1/Status/Flag")
     val weather = database.getReference("Node1/Status/Weather")
+    val power = database.getReference("Node1/Status/Power")
     val tempref = database.getReference("Node1/Status/Temp")
     val humiref = database.getReference("Node1/Status/Humi")
-    val lightTime = database.getReference("Node1/Status/Light")
+    val lightTime = database.getReference("Node1/Status/Time")
     val loraRef = database.getReference("Node1/Status/Lora")
     val autoRef = database.getReference("Node1/Status/Auto")
     val ledRef = database.getReference("Node1/Status/Led")
     val buttonRef = database.getReference("Node1/Status/Button")
     val rainRef = database.getReference("Node1/Status/Rain")
+
+    private val handler = Handler(Looper.getMainLooper())
+    private var previousTemp: Float? = null
+    private lateinit var runnableCode: Runnable
+
+    var previousPower by Delegates.notNull<Float>()
+
 
 
     override fun onCreateView(
@@ -170,25 +165,65 @@ class GardenFragment : Fragment() {
         var startTime:String = "22:00"
         var endTime:String = "7:00"
 
-        tempref.addValueEventListener(object : ValueEventListener {
-            override fun onDataChange(snapshot: DataSnapshot) {
-                // Get the data from the snapshot
-                val temp = snapshot.getValue<Int>()
-//                Log.d("value_loraStatus", "Value is: $loraStatus")
-                binding.edtTemp.setText(temp.toString())
+        runnableCode = object : Runnable {
+            override fun run() {
+                tempref.addListenerForSingleValueEvent(object : ValueEventListener {
+                    override fun onDataChange(snapshot: DataSnapshot) {
+                        val currentTemp = snapshot.getValue<Float>()
+                        binding.edtTemp.setText(currentTemp.toString())
+
+                        if (previousTemp != null && previousTemp == currentTemp) {
+                            loraRef.setValue(false)
+                        }
+
+                        previousTemp = currentTemp
+                    }
+
+                    override fun onCancelled(error: DatabaseError) {
+                        // Handle error
+                    }
+                })
+
+                handler.postDelayed(this, 60000)
+            }
+        }
+
+        handler.post(runnableCode)
+
+        power.addValueEventListener(object : ValueEventListener {
+            override fun onDataChange(dataSnapshot: DataSnapshot) {
+                val newPower = dataSnapshot.getValue(Float::class.java)
+                val sharedPref =  activity?.getSharedPreferences("PowerData", Context.MODE_PRIVATE)
+                val oldPower = sharedPref!!.getFloat("power", 2500F)
+
+                if (Math.abs(newPower!! - oldPower) / oldPower >= 0.15) {
+                    val builder = AlertDialog.Builder(context)
+                    builder.setMessage("Are you adding or removing bulbs?")
+                        .setPositiveButton("Yes") { dialog, id ->
+                            with(sharedPref.edit()) {
+                                putFloat("power", newPower)
+                                apply()
+                            }
+                        }
+                        .setNegativeButton("No") { dialog, id ->
+                            // User cancelled the dialog
+                        }
+                    builder.create().show()
+                }
             }
 
             override fun onCancelled(error: DatabaseError) {
-                // Handle error
+                Log.w(TAG, "Failed to read value.", error.toException())
             }
         })
+
 
         humiref.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 // Get the data from the snapshot
-                val himi = snapshot.getValue<Int>()
+                val himi = snapshot.getValue<Float>()
 //                Log.d("value_loraStatus", "Value is: $loraStatus")
-                binding.edtLight.setText(himi.toString())
+                binding.edtHumi.setText(himi.toString())
 
             }
 
@@ -200,7 +235,7 @@ class GardenFragment : Fragment() {
         lightTime.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 // Get the data from the snapshot
-                val timeLight = snapshot.getValue<Int>()
+                val timeLight = snapshot.getValue<Float>()
 //                Log.d("value_loraStatus", "Value is: $loraStatus")
                 binding.edtLight.setText(timeLight.toString() + "h")
 
@@ -437,9 +472,6 @@ class GardenFragment : Fragment() {
             }
         })
 
-        val serviceIntent = Intent(context, PowerStatusService::class.java)
-        context?.startService(serviceIntent)
-
 // Add a listener to listen for data changes
         rainRef.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
@@ -473,9 +505,6 @@ class GardenFragment : Fragment() {
                 // Handle error
             }
         })
-
-
-
     }
     // Function to calculate time interval between two times
     fun calculateTimeInterval(startTime: String, endTime: String) {
@@ -537,6 +566,30 @@ class GardenFragment : Fragment() {
             binding.edtHour.setText(rstimeActive)
         }
     }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        handler.removeCallbacks(runnableCode)
+    }
+    override fun onStart() {
+        super.onStart()
+
+        val intent = Intent(context, PowerStatusService::class.java)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            context?.startForegroundService(intent)
+        } else {
+            context?.startService(intent)
+        }
+    }
+
+
+    override fun onStop() {
+        super.onStop()
+
+        val intent = Intent(context, PowerStatusService::class.java)
+        context?.stopService(intent)
+    }
+
 
 }
 

@@ -48,7 +48,7 @@
                     app:layout_constraintTop_toTopOf="parent"
                     app:srcCompat="@drawable/top_background" />
 
-                <TextView
+                <!--<TextView
                     android:id="@+id/header"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -61,7 +61,7 @@
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintHorizontal_bias="0.489"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
+                    app:layout_constraintTop_toTopOf="parent" />-->
 
                <!-- <ImageView
                     android:id="@+id/imageView3"
@@ -96,20 +96,60 @@
                     android:layout_height="wrap_content"
                     android:layout_marginStart="40dp"
                     android:layout_marginEnd="40dp"
-                    android:layout_marginTop="5dp"
                     android:layout_marginBottom="10dp"
+                    android:layout_marginTop="10dp"
                     android:background="@drawable/white_top_buttons"
                     android:orientation="horizontal"
                     app:layout_constraintBottom_toTopOf="@+id/linearLayout"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/header">
+                    app:layout_constraintTop_toTopOf="@+id/imageView2">
 
                     <LinearLayout
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_margin="5dp"
+                        android:layout_margin="8dp"
                         android:orientation="vertical">
+
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_margin="5dp"
+                            android:background="@drawable/purple_top_buttons"
+                            android:orientation="horizontal">
+
+                            <ImageView
+                                android:id="@+id/ic_temp"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_margin="5dp"
+                                app:srcCompat="@drawable/celsius_6935032" />
+
+                            <TextView
+                                android:id="@+id/txt_temp"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center"
+                                android:text="Temperature:"
+                                android:textAlignment="center"
+                                android:textColor="#7182ef"
+                                android:textStyle="bold" />
+
+                            <TextView
+                                android:id="@+id/edt_temp"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center"
+                                android:layout_margin="5dp"
+                                android:layout_marginLeft="5dp"
+                                android:layout_marginEnd="5dp"
+                                android:text="25"
+                                android:textAlignment="center"
+                                android:textColor="#7182ef"
+                                android:textSize="16dp"
+                                android:textStyle="bold" />
+
+                        </LinearLayout>
 
                         <LinearLayout
                             android:layout_width="match_parent"
@@ -149,43 +189,6 @@
 
                         </LinearLayout>
 
-                        <LinearLayout
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_margin="5dp"
-                            android:background="@drawable/purple_top_buttons"
-                            android:orientation="horizontal">
-
-                            <ImageView
-                                android:id="@+id/ic_temp"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_margin="5dp"
-                                app:srcCompat="@drawable/celsius_6935032" />
-
-                            <TextView
-                                android:id="@+id/txt_temp"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_gravity="center"
-                                android:text="Temperature:"
-                                android:textAlignment="center"
-                                android:textColor="#7182ef"
-                                android:textStyle="bold" />
-
-                            <TextView
-                                android:id="@+id/edt_temp"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_gravity="center"
-                                android:layout_margin="5dp"
-                                android:text="25"
-                                android:textAlignment="center"
-                                android:textColor="#7182ef"
-                                android:textSize="16dp"
-                                android:textStyle="bold" />
-
-                        </LinearLayout>
 
                         <LinearLayout
                             android:layout_width="match_parent"
@@ -251,6 +254,7 @@
                                 android:id="@+id/ic_weather"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
+                                android:layout_gravity="center"
                                 android:layout_margin="5dp"
                                 app:srcCompat="@drawable/cloudy_100" />
 
@@ -270,7 +274,6 @@
                     android:orientation="horizontal"
                     app:layout_constraintBottom_toBottomOf="@+id/imageView2"
                     app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintHorizontal_bias="0.0"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@+id/imageView2">
 
@@ -278,7 +281,7 @@
                         android:id="@+id/btn_connect"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_margin="5dp"
+                        android:layout_margin="8dp"
                         android:layout_weight="1"
                         android:background="@drawable/purple_top_buttons"
                         android:orientation="vertical">
@@ -305,7 +308,7 @@
                         android:id="@+id/btn_active"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_margin="5dp"
+                        android:layout_margin="8dp"
                         android:layout_weight="1"
                         android:background="@drawable/purple_top_buttons"
                         android:orientation="vertical">
@@ -332,7 +335,7 @@
                         android:id="@+id/btn_rain"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_margin="5dp"
+                        android:layout_margin="8dp"
                         android:layout_weight="1"
                         android:background="@drawable/purple_top_buttons"
                         android:orientation="vertical">
@@ -349,7 +352,7 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_marginBottom="5dp"
-                            android:text="Rainy           Night"
+                            android:text="Rainy \nNight"
                             android:textAlignment="center"
                             android:textColor="#7182ef"
                             android:textStyle="bold" />
@@ -593,7 +596,7 @@
                             android:layout_marginStart="16dp"
                             android:layout_marginTop="10dp"
                             android:layout_marginBottom="10dp"
-                            android:text="Số giờ chong điện:"
+                            android:text="Số giờ chong đèn:"
                             android:textColor="#000000"
                             android:textSize="17sp"
                             android:textStyle="bold"

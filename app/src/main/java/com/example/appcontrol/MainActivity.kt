@@ -24,6 +24,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
       setContentView(R.layout.activity_main)
       val toolbar: Toolbar = findViewById(R.id.toolbar)
       setSupportActionBar(toolbar)
+      supportActionBar?.title = "ĐIỀU KHIỂN CHONG ĐÈN"
       mDrawerLayout = findViewById(R.id.drawer_layout)
       val toggle = ActionBarDrawerToggle(this, mDrawerLayout, toolbar, R.string.nav_drawer_open, R.string.nav_drawer_close)
       mDrawerLayout.addDrawerListener(toggle)

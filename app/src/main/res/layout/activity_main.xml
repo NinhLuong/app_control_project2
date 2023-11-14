@@ -27,6 +27,7 @@
                 android:layout_height="wrap_content"
                 android:background="@color/purple_500"
                 app:popupTheme="@style/ThemeOverlay.AppCompat.Dark"/>
+
         </com.google.android.material.appbar.AppBarLayout>
         <!--3) Tạo view group tương ứng với từng Fragment của item trong navigation view  -->
         <!-- Đây sẽ là nơi mà hiển thị các fragment tương ứng -->
