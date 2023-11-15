@@ -112,7 +112,7 @@ class PowerStatusService : Service() {
             }
 
             override fun onCancelled(error: DatabaseError) {
-                // Log a message
+                Toast.makeText(applicationContext, "Error: $error", Toast.LENGTH_SHORT).show()
             }
         })
         return START_STICKY
@@ -120,11 +120,6 @@ class PowerStatusService : Service() {
 
     override fun onBind(intent: Intent?): IBinder? {
         return null
-    }
-
-    private fun getPendingIntent(): PendingIntent {
-        val intent = packageManager.getLaunchIntentForPackage(packageName)
-        return PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT)
     }
 }
 
