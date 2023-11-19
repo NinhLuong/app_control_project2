@@ -50,7 +50,7 @@ class PowerStatusService : Service() {
 
     override fun onCreate() {
         super.onCreate()
-        powerRef = FirebaseDatabase.getInstance().getReference("Node1/Status/SOS")
+        powerRef = FirebaseDatabase.getInstance().getReference("Node1/SOS")
         notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         val notificationSoundUri: Uri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM)
         ringtone = RingtoneManager.getRingtone(applicationContext, notificationSoundUri)
@@ -127,26 +127,25 @@ class PowerStatusService : Service() {
 class GardenFragment : Fragment() {
 
     val database = FirebaseDatabase.getInstance()
-    val TimeOn = database.getReference("Node1/Time/TimeOn")
-    val TimeOff = database.getReference("Node1/Time/TimeOff")
-    val ample = database.getReference("Node1/Status/Ample")
-    val flag = database.getReference("Node1/Status/Flag")
-    val weather = database.getReference("Node1/Status/Weather")
-    val power = database.getReference("Node1/Status/Power")
-    val tempref = database.getReference("Node1/Status/Temp")
-    val humiref = database.getReference("Node1/Status/Humi")
-    val lightTime = database.getReference("Node1/Status/Time")
-    val loraRef = database.getReference("Node1/Status/Lora")
-    val autoRef = database.getReference("Node1/Status/Auto")
-    val ledRef = database.getReference("Node1/Status/Led")
-    val buttonRef = database.getReference("Node1/Status/Button")
-    val rainRef = database.getReference("Node1/Status/Rain")
+    val TimeOn = database.getReference("Node1/TimeOn")
+    val TimeOff = database.getReference("Node1/TimeOff")
+    val flag = database.getReference("Node1/Flag")
+    val weather = database.getReference("Node1/Weather")
+    val power = database.getReference("Node1/Current")
+    val tempref = database.getReference("Node1/Temp")
+    val humiref = database.getReference("Node1/Humi")
+    val lightTime = database.getReference("Node1/Time")
+    val loraRef = database.getReference("Node1/Lora")
+    val autoRef = database.getReference("Node1/Auto")
+    val ledRef = database.getReference("Node1/Led")
+    val buttonRef = database.getReference("Node1/Button")
+    val rainRef = database.getReference("Node1/Rain")
+    val openRef = database.getReference("Node1/Open")
 
     private val handler = Handler(Looper.getMainLooper())
     private var previousTemp: Float? = null
     private lateinit var runnableCode: Runnable
 
-    var previousPower by Delegates.notNull<Float>()
 
 
 
@@ -168,14 +167,14 @@ class GardenFragment : Fragment() {
             override fun run() {
                 tempref.addListenerForSingleValueEvent(object : ValueEventListener {
                     override fun onDataChange(snapshot: DataSnapshot) {
-                        val currentTemp = snapshot.getValue<Float>()
-                        binding.edtTemp.setText(currentTemp.toString())
+                        val currentTemp = snapshot.getValue<String>()
+                        binding.edtTemp.setText(currentTemp)
 
-                        if (previousTemp != null && previousTemp == currentTemp) {
-                            loraRef.setValue(false)
+                        if (previousTemp != null && previousTemp == currentTemp!!.toFloat()) {
+                            loraRef.setValue("false")
                         }
 
-                        previousTemp = currentTemp
+                        previousTemp = currentTemp!!.toFloat()
                     }
 
                     override fun onCancelled(error: DatabaseError) {
@@ -191,24 +190,27 @@ class GardenFragment : Fragment() {
 
         power.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
-                val newPower = dataSnapshot.getValue(Float::class.java)
-                val sharedPref =  activity?.getSharedPreferences("PowerData", Context.MODE_PRIVATE)
-                val oldPower = sharedPref!!.getFloat("power", 2500F)
+                val powerVal = dataSnapshot.getValue<String>()
+                var newPower = 0F
+                if (powerVal != ""){
+                    newPower = powerVal?.toFloatOrNull()!!
+                    if (newPower != null) {
+                        val sharedPref =  activity?.getSharedPreferences("PowerData", Context.MODE_PRIVATE)
+                        val oldPower = sharedPref!!.getFloat("power", 2500F)
 
-                if (Math.abs(newPower!! - oldPower) / oldPower >= 0.15) {
-                    val builder = AlertDialog.Builder(context)
-                    builder.setMessage("Are you adding or removing bulbs?")
-                        .setPositiveButton("Yes") { dialog, id ->
-                            with(sharedPref.edit()) {
-                                putFloat("power", newPower)
-                                apply()
-                            }
+                        if (Math.abs(newPower - oldPower) / oldPower >= 0.15) {
+                            val builder = AlertDialog.Builder(context)
+                            builder.setMessage("Are you adding or removing bulbs?")
+                                .setPositiveButton("Yes") { dialog, id ->
+                                    with(sharedPref.edit()) {
+                                        putFloat("power", newPower)
+                                        apply()
+                                    }
+                                }
                         }
-                        .setNegativeButton("No") { dialog, id ->
-                            // User cancelled the dialog
-                        }
-                    builder.create().show()
+                    }
                 }
+
             }
 
             override fun onCancelled(error: DatabaseError) {
@@ -220,9 +222,23 @@ class GardenFragment : Fragment() {
         humiref.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 // Get the data from the snapshot
-                val himi = snapshot.getValue<Float>()
+                val himi = snapshot.getValue<String>()
 //                Log.d("value_loraStatus", "Value is: $loraStatus")
-                binding.edtHumi.setText(himi.toString())
+                binding.edtHumi.setText(himi)
+
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                // Handle error
+            }
+        })
+
+        weather.addValueEventListener(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                // Get the data from the snapshot
+                val weatherIcon = snapshot.getValue<String>()
+//                Log.d("value_loraStatus", "Value is: $loraStatus")
+                binding.icWeather.setImageResource(R.drawable.cloudy_100)
 
             }
 
@@ -234,9 +250,9 @@ class GardenFragment : Fragment() {
         lightTime.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 // Get the data from the snapshot
-                val timeLight = snapshot.getValue<Float>()
+                val timeLight = snapshot.getValue<String>()
 //                Log.d("value_loraStatus", "Value is: $loraStatus")
-                binding.edtLight.setText(timeLight.toString() + "h")
+                binding.edtLight.setText(timeLight + "h")
 
             }
 
@@ -347,15 +363,16 @@ class GardenFragment : Fragment() {
 //                binding.switch4.isChecked = false
 
                 // Update the dataset in Firebase
-                ledRef.setValue(false)
-                autoRef.setValue(true)
+                ledRef.setValue("false")
+                autoRef.setValue("true")
+                openRef.setValue("true")
             }
             else {
                 // Switch is unchecked, show constraintLayout and hide linearLayout
                 binding.contentCustome.visibility = View.VISIBLE
                 binding.contentAuto.visibility = View.GONE
 
-                autoRef.setValue(false)
+                autoRef.setValue("false")
             }
         }
 
@@ -367,17 +384,17 @@ class GardenFragment : Fragment() {
             editor!!.putBoolean("switchLedState", isChecked)
             editor.apply()
             if (isChecked) {
-                ledRef.setValue(true)
+                ledRef.setValue("true")
             } else {
-                ledRef.setValue(false)
+                ledRef.setValue("false")
             }
         }
 
 
         ledRef.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
-                val switchState = snapshot.getValue<Boolean>()
-                val isChecked = switchState == true
+                val switchState = snapshot.getValue<String>()
+                val isChecked = switchState == "true"
                 binding.switchLed.isChecked = isChecked
                 val sharedPreferences = activity?.getSharedPreferences("ledstatus", Context.MODE_PRIVATE)
                 val editor = sharedPreferences!!.edit()
@@ -407,7 +424,7 @@ class GardenFragment : Fragment() {
         val edtActiveTime = binding.edtActiveTime
 
         // Retrieve the saved value from Firebase and set it to the EditText
-        databasechild.child("Node1/Time/TimeActive").addListenerForSingleValueEvent(object :
+        databasechild.child("Node1/TimeActive").addListenerForSingleValueEvent(object :
             ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 val activeTime = snapshot.getValue(String::class.java)
@@ -424,7 +441,7 @@ class GardenFragment : Fragment() {
                 val input = edtActiveTime.text.toString()
                 if (input.matches(Regex("^([01]\\d|2[0-3]):([0-5]\\d)$"))) {
                     // Save the entered data to Firebase
-                    databasechild.child("Node1/Time/TimeActive").setValue(input)
+                    databasechild.child("Node1/TimeActive").setValue(input)
 
                     // Hide the keyboard and clear focus from the EditText
                     val inputMethodManager = activity?.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
@@ -440,18 +457,18 @@ class GardenFragment : Fragment() {
         loraRef.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 // Get the data from the snapshot
-                val loraStatus = snapshot.getValue<Boolean>()
+                val loraStatus = snapshot.getValue<String>()
 //                Log.d("value_loraStatus", "Value is: $loraStatus")
 
                 // Update the UI based on the data
                 when(loraStatus){
-                    true -> {
+                    "true" -> {
                         // Update the connected UI
                         binding.icConnectedDevices.setImageResource(R.drawable.connect)
                         binding.txtConnectedDevices.text = "Connected \nDevices"
                     }
 
-                    false -> {
+                    "false" -> {
                         // Update the disconnected UI
                         binding.icConnectedDevices.setImageResource(R.drawable.disconnect)
                         binding.txtConnectedDevices.text = "Disonnected \nDevices"
@@ -475,12 +492,12 @@ class GardenFragment : Fragment() {
         rainRef.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 // Get the data from the snapshot
-                val rainStatus = snapshot.getValue<Boolean>()
+                val rainStatus = snapshot.getValue<String>()
                 Log.d("value_rainStatus", "Value is: $rainStatus")
 
                 // Update the UI based on the data
                 when(rainStatus){
-                    true -> {
+                    "true" -> {
                         // Update the connected UI
                         binding.iconRainyNight.setImageResource(R.drawable.rainy_night)
                         binding.textRainyNight.text = "Rainy \nNight"
@@ -488,10 +505,10 @@ class GardenFragment : Fragment() {
 
                     }
 
-                    false -> {
+                    "false" -> {
                         // Update the disconnected UI
                         binding.iconRainyNight.setImageResource(R.drawable.night)
-                        binding.textRainyNight.text = "Clouse \nNight"
+                        binding.textRainyNight.text = "Cloud \nNight"
                         binding.Led.visibility = View.VISIBLE
                     }
 
@@ -542,7 +559,7 @@ class GardenFragment : Fragment() {
         // Format the interval as HH:mm
         val formattedInterval = String.format("%02d:%02d", hours, minutes)
         val database = FirebaseDatabase.getInstance()
-        val timeActive = database.getReference("Node1/Time/TimeActive")
+        val timeActive = database.getReference("Node1/TimeActive")
         timeActive.setValue(formattedInterval)
 
         // Save the selected time in SharedPreferences
@@ -580,4 +597,3 @@ class GardenFragment : Fragment() {
     }
 
 }
-
