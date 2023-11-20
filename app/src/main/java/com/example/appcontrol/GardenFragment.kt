@@ -172,11 +172,11 @@ class GardenFragment : Fragment() {
 
                         if (previousTemp != null && previousTemp == currentTemp!!.toFloat()) {
                             loraRef.setValue("false")
+                        }else if(previousTemp != currentTemp!!.toFloat()){
+                            loraRef.setValue("true")
                         }
-
                         previousTemp = currentTemp!!.toFloat()
                     }
-
                     override fun onCancelled(error: DatabaseError) {
                         // Handle error
                     }
