@@ -199,7 +199,7 @@ class GardenFragment1 : Fragment() {
 
                         if (Math.abs(newPower - oldPower) / oldPower >= 0.15) {
                             val builder = AlertDialog.Builder(context)
-                            builder.setMessage("Are you adding or removing bulbs?")
+                            builder.setMessage("Are you adding or removing bulbs?"  )
                                 .setPositiveButton("Yes") { dialog, id ->
                                     with(sharedPref.edit()) {
                                         putFloat("power", newPower)
