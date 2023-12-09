@@ -1,5 +1,5 @@
 package com.example.appcontrol
-
+import kotlinx.coroutines.*
 import android.app.AlertDialog
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -98,16 +98,16 @@ class PowerStatusService1 : Service() {
                         .setContentIntent(pendingIntent)
                     notificationManager.notify(powerStatusNotificationId, notificationBuilder.build())
 
-                    if (!ringtone.isPlaying) {
+                    /*if (!ringtone.isPlaying) {
                         ringtone.play()
-                    }
+                    }*/
                 }else {
                     notificationBuilder.setContentText("Power status is connected")
                     notificationManager.notify(powerStatusNotificationId, notificationBuilder.build())
 
-                    if (ringtone.isPlaying) {
+                    /*if (ringtone.isPlaying) {
                         ringtone.stop()
-                    }
+                    }*/
                 }
             }
 
@@ -199,23 +199,40 @@ class GardenFragment1 : Fragment() {
 
                         if (Math.abs(newPower - oldPower) / oldPower >= 0.15) {
                             val builder = AlertDialog.Builder(context)
-                            builder.setMessage("Are you adding or removing bulbs?"  )
+                            builder.setMessage("Are you adding or removing bulbs?")
                                 .setPositiveButton("Yes") { dialog, id ->
                                     with(sharedPref.edit()) {
                                         putFloat("power", newPower)
                                         apply()
                                     }
+                                    flag.setValue("false")
                                 }
+                                .setNegativeButton("No") { dialog, id ->
+                                    // User cancelled the dialog
+                                }
+                                .setCancelable(false)
+
+                            val dialog = builder.create()
+                            dialog.show()
+
+                            CoroutineScope(Dispatchers.Main).launch {
+                                delay(60000) // 60 seconds delay
+                                if (dialog.isShowing) {
+                                    dialog.dismiss()
+                                    flag.setValue("true")
+                                }
+                            }
                         }
                     }
                 }
-
             }
 
             override fun onCancelled(error: DatabaseError) {
                 Log.w(TAG, "Failed to read value.", error.toException())
             }
         })
+
+
 
 
         humiref.addValueEventListener(object : ValueEventListener {

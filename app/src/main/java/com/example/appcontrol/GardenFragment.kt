@@ -38,7 +38,7 @@ import java.text.SimpleDateFormat
 import java.util.Calendar
 import kotlin.math.abs
 import kotlin.properties.Delegates
-
+import kotlinx.coroutines.*
 private lateinit var binding: FragmentGardenBinding
 
 class PowerStatusService : Service() {
@@ -97,16 +97,16 @@ class PowerStatusService : Service() {
                         .setContentIntent(pendingIntent)
                     notificationManager.notify(powerStatusNotificationId, notificationBuilder.build())
 
-                    if (!ringtone.isPlaying) {
+                   /* if (!ringtone.isPlaying) {
                         ringtone.play()
-                    }
+                    }*/
                 }else {
                     notificationBuilder.setContentText("Power status is connected")
                     notificationManager.notify(powerStatusNotificationId, notificationBuilder.build())
 
-                    if (ringtone.isPlaying) {
+                    /*if (ringtone.isPlaying) {
                         ringtone.stop()
-                    }
+                    }*/
                 }
             }
 
@@ -185,6 +185,8 @@ class GardenFragment : Fragment() {
 
         handler.post(runnableCode)
 
+
+
         power.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 val powerVal = dataSnapshot.getValue<String>()
@@ -203,17 +205,33 @@ class GardenFragment : Fragment() {
                                         putFloat("power", newPower)
                                         apply()
                                     }
+                                    flag.setValue("false")
                                 }
+                                .setNegativeButton("No") { dialog, id ->
+                                    // User cancelled the dialog
+                                }
+                                .setCancelable(false)
+
+                            val dialog = builder.create()
+                            dialog.show()
+
+                            CoroutineScope(Dispatchers.Main).launch {
+                                delay(60000) // 60 seconds delay
+                                if (dialog.isShowing) {
+                                    dialog.dismiss()
+                                    flag.setValue("true")
+                                }
+                            }
                         }
                     }
                 }
-
             }
 
             override fun onCancelled(error: DatabaseError) {
                 Log.w(TAG, "Failed to read value.", error.toException())
             }
         })
+
 
 
         humiref.addValueEventListener(object : ValueEventListener {
