@@ -27,6 +27,7 @@ import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
 import androidx.core.app.NotificationCompat
 import androidx.fragment.app.Fragment
+import com.example.appcontrol.databinding.FragmentGarden1Binding
 import com.example.appcontrol.databinding.FragmentGardenBinding
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
@@ -39,9 +40,9 @@ import java.util.Calendar
 import kotlin.math.abs
 import kotlin.properties.Delegates
 
-private lateinit var binding: FragmentGardenBinding
+private lateinit var binding: FragmentGarden1Binding
 
-class PowerStatusService : Service() {
+class PowerStatusService1 : Service() {
     private lateinit var powerRef: DatabaseReference
     private lateinit var notificationManager: NotificationManager
     private lateinit var ringtone: Ringtone
@@ -122,7 +123,8 @@ class PowerStatusService : Service() {
     }
 }
 
-class GardenFragment : Fragment() {
+
+class GardenFragment1 : Fragment() {
 
     val database = FirebaseDatabase.getInstance()
     val TimeOn = database.getReference("Node1/TimeOn")
@@ -150,7 +152,7 @@ class GardenFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        binding = FragmentGardenBinding.inflate(inflater, container, false)
+        binding = FragmentGarden1Binding.inflate(inflater, container, false)
         return binding.root
     }
 

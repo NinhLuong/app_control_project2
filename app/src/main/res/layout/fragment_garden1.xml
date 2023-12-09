@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#e8e8f9"
-    tools:context=".GardenFragment">
+    tools:context=".GardenFragment1">
 
     <ScrollView
         android:id="@+id/scrollView2"
@@ -63,15 +63,15 @@
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />-->
 
-               <!-- <ImageView
-                    android:id="@+id/imageView3"
-                    android:layout_width="0dp"
-                    android:layout_height="150dp"
-                    app:layout_constraintBottom_toBottomOf="@+id/imageView2"
-                    app:layout_constraintEnd_toEndOf="@+id/imageView2"
-                    app:layout_constraintTop_toBottomOf="@+id/header"
-                    app:layout_constraintVertical_bias="0.123"
-                    app:srcCompat="@drawable/member" />-->
+                <!-- <ImageView
+                     android:id="@+id/imageView3"
+                     android:layout_width="0dp"
+                     android:layout_height="150dp"
+                     app:layout_constraintBottom_toBottomOf="@+id/imageView2"
+                     app:layout_constraintEnd_toEndOf="@+id/imageView2"
+                     app:layout_constraintTop_toBottomOf="@+id/header"
+                     app:layout_constraintVertical_bias="0.123"
+                     app:srcCompat="@drawable/member" />-->
 
                 <!--<TextView
                     android:id="@+id/textView11"

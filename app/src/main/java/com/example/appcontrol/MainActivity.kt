@@ -46,7 +46,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
          }
          R.id.nav_home2 -> {
             if (mCurrentFragment != FRAGMENT_FAVOR) {
-               replaceFragment(ItemFragment())
+               replaceFragment(GardenFragment1())
                mCurrentFragment = FRAGMENT_FAVOR
             }
          }
