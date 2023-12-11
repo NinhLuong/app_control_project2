@@ -38,10 +38,10 @@ import java.text.SimpleDateFormat
 import java.util.Calendar
 import kotlin.math.abs
 import kotlin.properties.Delegates
-import kotlinx.coroutines.*
+
 private lateinit var binding: FragmentGardenBinding
 
-class PowerStatusService : Service() {
+/*class PowerStatusService : Service() {
     private lateinit var powerRef: DatabaseReference
     private lateinit var notificationManager: NotificationManager
     private lateinit var ringtone: Ringtone
@@ -97,17 +97,18 @@ class PowerStatusService : Service() {
                         .setContentIntent(pendingIntent)
                     notificationManager.notify(powerStatusNotificationId, notificationBuilder.build())
 
-                   /* if (!ringtone.isPlaying) {
+                    if (!ringtone.isPlaying) {
                         ringtone.play()
-                    }*/
+                    }
                 }else {
                     notificationBuilder.setContentText("Power status is connected")
                     notificationManager.notify(powerStatusNotificationId, notificationBuilder.build())
 
-                    /*if (ringtone.isPlaying) {
+                    if (ringtone.isPlaying) {
                         ringtone.stop()
-                    }*/
+                    }
                 }
+
             }
 
             override fun onCancelled(error: DatabaseError) {
@@ -120,7 +121,8 @@ class PowerStatusService : Service() {
     override fun onBind(intent: Intent?): IBinder? {
         return null
     }
-}
+}*/
+
 
 class GardenFragment : Fragment() {
 
@@ -143,6 +145,7 @@ class GardenFragment : Fragment() {
     private val handler = Handler(Looper.getMainLooper())
     private var previousTemp: Float? = null
     private lateinit var runnableCode: Runnable
+
 
 
 
@@ -169,11 +172,11 @@ class GardenFragment : Fragment() {
 
                         if (previousTemp != null && previousTemp == currentTemp!!.toFloat()) {
                             loraRef.setValue("false")
-                        }else if(previousTemp != currentTemp!!.toFloat()){
-                            loraRef.setValue("true")
                         }
+
                         previousTemp = currentTemp!!.toFloat()
                     }
+
                     override fun onCancelled(error: DatabaseError) {
                         // Handle error
                     }
@@ -185,41 +188,75 @@ class GardenFragment : Fragment() {
 
         handler.post(runnableCode)
 
-
-
         power.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 val powerVal = dataSnapshot.getValue<String>()
                 var newPower = 0F
-                if (powerVal != ""){
+                var fireCount = 0
+                var count = 0
+                if (powerVal != "") {
                     newPower = powerVal?.toFloatOrNull()!!
                     if (newPower != null) {
-                        val sharedPref =  activity?.getSharedPreferences("PowerData", Context.MODE_PRIVATE)
-                        val oldPower = sharedPref!!.getFloat("power", 2500F)
+                        val sharedPref =
+                            activity?.getSharedPreferences("PowerData", Context.MODE_PRIVATE)
+                        val oldPower = sharedPref!!.getFloat("power", 0.34F)
 
-                        if (Math.abs(newPower - oldPower) / oldPower >= 0.15) {
-                            val builder = AlertDialog.Builder(context)
-                            builder.setMessage("Are you adding or removing bulbs?")
-                                .setPositiveButton("Yes") { dialog, id ->
-                                    with(sharedPref.edit()) {
-                                        putFloat("power", newPower)
-                                        apply()
+                        if (newPower < 0.34) {
+                            count++
+                            if (count >= 3) {
+                                val builder = AlertDialog.Builder(context)
+                                builder.setMessage("Are you removing bulbs?")
+                                    .setPositiveButton("Ok") { dialog, id ->
+                                        with(sharedPref.edit()) {
+                                            putFloat("power", newPower)
+                                            apply()
+                                        }
+                                        // setvalue flag on firebase to true
                                     }
-                                    flag.setValue("false")
-                                }
-                                .setNegativeButton("No") { dialog, id ->
-                                    // User cancelled the dialog
-                                }
-                                .setCancelable(false)
+                                    .setNegativeButton("Cancel") { dialog, id ->
+                                        // setvalue flag on firebase to false
+                                        dialog.cancel()
+                                    }
+                                    .setCancelable(false)
 
-                            val dialog = builder.create()
-                            dialog.show()
+                                val dialog = builder.create()
+                                dialog.show()
 
-                            CoroutineScope(Dispatchers.Main).launch {
-                                delay(60000) // 60 seconds delay
-                                if (dialog.isShowing) {
-                                    dialog.dismiss()
-                                    flag.setValue("true")
+                                // If the user does not press anything for 3 minutes, automatically exit the popup and set the value flag on firebase to false
+                                Handler(Looper.getMainLooper()).postDelayed({
+                                    if (dialog.isShowing) {
+                                        dialog.dismiss()
+                                        // setvalue flag on firebase to false
+                                    }
+                                }, 180000) // 3 minutes in milliseconds
+                            } else if (newPower < 0.14) {
+                                fireCount++
+                                if (fireCount >= 3) {
+                                    val builder = AlertDialog.Builder(context)
+                                    builder.setMessage("Have you received a notification of a system fire?")
+                                        .setPositiveButton("Ok") { dialog, id ->
+                                            with(sharedPref.edit()) {
+                                                putFloat("power", newPower)
+                                                apply()
+                                            }
+                                            // setvalue flag on firebase to true
+                                        }
+                                        .setNegativeButton("Cancel") { dialog, id ->
+                                            // setvalue flag on firebase to false
+                                            dialog.cancel()
+                                        }
+                                        .setCancelable(false)
+
+                                    val dialog = builder.create()
+                                    dialog.show()
+
+                                    // If the user does not press anything for 3 minutes, automatically exit the popup and set the value flag on firebase to false
+                                    Handler(Looper.getMainLooper()).postDelayed({
+                                        if (dialog.isShowing) {
+                                            dialog.dismiss()
+                                            // setvalue flag on firebase to false
+                                        }
+                                    }, 180000) // 3 minutes in milliseconds
                                 }
                             }
                         }
@@ -231,7 +268,6 @@ class GardenFragment : Fragment() {
                 Log.w(TAG, "Failed to read value.", error.toException())
             }
         })
-
 
 
         humiref.addValueEventListener(object : ValueEventListener {
@@ -537,15 +573,18 @@ class GardenFragment : Fragment() {
             }
         })
 
-        val intent = Intent(context, PowerStatusService::class.java)
+        /*val intent = Intent(context, PowerStatusService::class.java)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             context?.startForegroundService(intent)
         } else {
             context?.startService(intent)
-        }
+        }*/
 
     }
-    // Function to calculate time interval between two times
+
+
+
+            // Function to calculate time interval between two times
     fun calculateTimeInterval(startTime: String, endTime: String) {
         val format = SimpleDateFormat("HH:mm")
         val calendar = Calendar.getInstance()
