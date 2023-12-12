@@ -38,7 +38,7 @@ import java.text.SimpleDateFormat
 import java.util.Calendar
 import kotlin.math.abs
 import kotlin.properties.Delegates
-
+import kotlinx.coroutines.*
 private lateinit var binding: FragmentGardenBinding
 
 /*class PowerStatusService : Service() {
@@ -97,18 +97,17 @@ private lateinit var binding: FragmentGardenBinding
                         .setContentIntent(pendingIntent)
                     notificationManager.notify(powerStatusNotificationId, notificationBuilder.build())
 
-                    if (!ringtone.isPlaying) {
+                   *//* if (!ringtone.isPlaying) {
                         ringtone.play()
-                    }
+                    }*//*
                 }else {
                     notificationBuilder.setContentText("Power status is connected")
                     notificationManager.notify(powerStatusNotificationId, notificationBuilder.build())
 
-                    if (ringtone.isPlaying) {
+                    *//*if (ringtone.isPlaying) {
                         ringtone.stop()
-                    }
+                    }*//*
                 }
-
             }
 
             override fun onCancelled(error: DatabaseError) {
@@ -122,7 +121,6 @@ private lateinit var binding: FragmentGardenBinding
         return null
     }
 }*/
-
 
 class GardenFragment : Fragment() {
 
@@ -145,7 +143,6 @@ class GardenFragment : Fragment() {
     private val handler = Handler(Looper.getMainLooper())
     private var previousTemp: Float? = null
     private lateinit var runnableCode: Runnable
-
 
 
 
@@ -172,11 +169,11 @@ class GardenFragment : Fragment() {
 
                         if (previousTemp != null && previousTemp == currentTemp!!.toFloat()) {
                             loraRef.setValue("false")
+                        }else if(previousTemp != currentTemp!!.toFloat()){
+                            loraRef.setValue("true")
                         }
-
                         previousTemp = currentTemp!!.toFloat()
                     }
-
                     override fun onCancelled(error: DatabaseError) {
                         // Handle error
                     }
@@ -188,12 +185,14 @@ class GardenFragment : Fragment() {
 
         handler.post(runnableCode)
 
+
+
         power.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 val powerVal = dataSnapshot.getValue<String>()
                 var newPower = 0F
-                var fireCount = 0
                 var count = 0
+                var fireCount = 0
                 if (powerVal != "") {
                     newPower = powerVal?.toFloatOrNull()!!
                     if (newPower != null) {
@@ -206,16 +205,18 @@ class GardenFragment : Fragment() {
                             if (count >= 3) {
                                 val builder = AlertDialog.Builder(context)
                                 builder.setMessage("Are you removing bulbs?")
-                                    .setPositiveButton("Ok") { dialog, id ->
+                                    .setPositiveButton("Yes") { dialog, id ->
                                         with(sharedPref.edit()) {
                                             putFloat("power", newPower)
                                             apply()
+                                            flag.setValue("true")
                                         }
                                         // setvalue flag on firebase to true
                                     }
-                                    .setNegativeButton("Cancel") { dialog, id ->
+                                    .setNegativeButton("No") { dialog, id ->
                                         // setvalue flag on firebase to false
                                         dialog.cancel()
+                                        flag.setValue("false")
                                     }
                                     .setCancelable(false)
 
@@ -229,35 +230,37 @@ class GardenFragment : Fragment() {
                                         // setvalue flag on firebase to false
                                     }
                                 }, 180000) // 3 minutes in milliseconds
-                            } else if (newPower < 0.14) {
-                                fireCount++
-                                if (fireCount >= 3) {
-                                    val builder = AlertDialog.Builder(context)
-                                    builder.setMessage("Have you received a notification of a system fire?")
-                                        .setPositiveButton("Ok") { dialog, id ->
-                                            with(sharedPref.edit()) {
-                                                putFloat("power", newPower)
-                                                apply()
-                                            }
-                                            // setvalue flag on firebase to true
+                            }
+                        }else if (newPower < 0.14) {
+                            fireCount++
+                            if (fireCount >= 3) {
+                                val builder = AlertDialog.Builder(context)
+                                builder.setMessage("Have you received a notification of a system fire?")
+                                    .setPositiveButton("Yes") { dialog, id ->
+                                        with(sharedPref.edit()) {
+                                            putFloat("power", newPower)
+                                            apply()
+                                            flag.setValue("true")
                                         }
-                                        .setNegativeButton("Cancel") { dialog, id ->
-                                            // setvalue flag on firebase to false
-                                            dialog.cancel()
-                                        }
-                                        .setCancelable(false)
+                                        // setvalue flag on firebase to true
+                                    }
+                                    .setNegativeButton("No") { dialog, id ->
+                                        // setvalue flag on firebase to false
+                                        dialog.cancel()
+                                        flag.setValue("false")
+                                    }
+                                    .setCancelable(false)
 
-                                    val dialog = builder.create()
-                                    dialog.show()
+                                val dialog = builder.create()
+                                dialog.show()
 
-                                    // If the user does not press anything for 3 minutes, automatically exit the popup and set the value flag on firebase to false
-                                    Handler(Looper.getMainLooper()).postDelayed({
-                                        if (dialog.isShowing) {
-                                            dialog.dismiss()
-                                            // setvalue flag on firebase to false
-                                        }
-                                    }, 180000) // 3 minutes in milliseconds
-                                }
+                                // If the user does not press anything for 3 minutes, automatically exit the popup and set the value flag on firebase to false
+                                Handler(Looper.getMainLooper()).postDelayed({
+                                    if (dialog.isShowing) {
+                                        dialog.dismiss()
+                                        // setvalue flag on firebase to false
+                                    }
+                                }, 180000) // 3 minutes in milliseconds
                             }
                         }
                     }
@@ -268,6 +271,7 @@ class GardenFragment : Fragment() {
                 Log.w(TAG, "Failed to read value.", error.toException())
             }
         })
+
 
 
         humiref.addValueEventListener(object : ValueEventListener {
@@ -573,18 +577,17 @@ class GardenFragment : Fragment() {
             }
         })
 
-        /*val intent = Intent(context, PowerStatusService::class.java)
+/*
+        val intent = Intent(context, PowerStatusService::class.java)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             context?.startForegroundService(intent)
         } else {
             context?.startService(intent)
-        }*/
+        }
+*/
 
     }
-
-
-
-            // Function to calculate time interval between two times
+    // Function to calculate time interval between two times
     fun calculateTimeInterval(startTime: String, endTime: String) {
         val format = SimpleDateFormat("HH:mm")
         val calendar = Calendar.getInstance()

@@ -192,6 +192,7 @@ class GardenFragment1 : Fragment() {
                 val powerVal = dataSnapshot.getValue<String>()
                 var newPower = 0F
                 var count = 0
+                var fireCount = 0
                 if (powerVal != "") {
                     newPower = powerVal?.toFloatOrNull()!!
                     if (newPower != null) {
@@ -204,6 +205,35 @@ class GardenFragment1 : Fragment() {
                             if (count >= 3) {
                                 val builder = AlertDialog.Builder(context)
                                 builder.setMessage("Are you removing bulbs?")
+                                    .setPositiveButton("Ok") { dialog, id ->
+                                        with(sharedPref.edit()) {
+                                            putFloat("power", newPower)
+                                            apply()
+                                        }
+                                        // setvalue flag on firebase to true
+                                    }
+                                    .setNegativeButton("Cancel") { dialog, id ->
+                                        // setvalue flag on firebase to false
+                                        dialog.cancel()
+                                    }
+                                    .setCancelable(false)
+
+                                val dialog = builder.create()
+                                dialog.show()
+
+                                // If the user does not press anything for 3 minutes, automatically exit the popup and set the value flag on firebase to false
+                                Handler(Looper.getMainLooper()).postDelayed({
+                                    if (dialog.isShowing) {
+                                        dialog.dismiss()
+                                        // setvalue flag on firebase to false
+                                    }
+                                }, 180000) // 3 minutes in milliseconds
+                            }
+                        }else if (newPower < 0.14) {
+                            fireCount++
+                            if (fireCount >= 3) {
+                                val builder = AlertDialog.Builder(context)
+                                builder.setMessage("Have you received a notification of a system fire?")
                                     .setPositiveButton("Ok") { dialog, id ->
                                         with(sharedPref.edit()) {
                                             putFloat("power", newPower)
