@@ -127,20 +127,20 @@ private lateinit var binding: FragmentGarden1Binding
 class GardenFragment1 : Fragment() {
 
     val database = FirebaseDatabase.getInstance()
-    val TimeOn = database.getReference("Node1/TimeOn")
-    val TimeOff = database.getReference("Node1/TimeOff")
-    val flag = database.getReference("Node1/Flag")
-    val weather = database.getReference("Node1/Weather")
-    val power = database.getReference("Node1/Current")
-    val tempref = database.getReference("Node1/Temp")
-    val humiref = database.getReference("Node1/Humi")
-    val lightTime = database.getReference("Node1/TimeLight")
-    val loraRef = database.getReference("Node1/Lora")
-    val autoRef = database.getReference("Node1/Auto")
-    val ledRef = database.getReference("Node1/Led")
-    val buttonRef = database.getReference("Node1/Button")
-    val rainRef = database.getReference("Node1/Rain")
-    val openRef = database.getReference("Node1/Open")
+    val TimeOn = database.getReference("Node2/TimeOn")
+    val TimeOff = database.getReference("Node2/TimeOff")
+    val flag = database.getReference("Node2/Flag")
+    val weather = database.getReference("Node2/Weather")
+    val power = database.getReference("Node2/Current")
+    val tempref = database.getReference("Node2/Temp")
+    val humiref = database.getReference("Node2/Humi")
+    val lightTime = database.getReference("Node2/TimeLight")
+    val loraRef = database.getReference("Node2/Lora")
+    val autoRef = database.getReference("Node2/Auto")
+    val ledRef = database.getReference("Node2/Led")
+    val buttonRef = database.getReference("Node2/Button")
+    val rainRef = database.getReference("Node2/Rain")
+    val openRef = database.getReference("Node2/Open")
 
     private val handler = Handler(Looper.getMainLooper())
     private var previousTemp: Float? = null
@@ -197,7 +197,7 @@ class GardenFragment1 : Fragment() {
                     newPower = powerVal?.toFloatOrNull()!!
                     if (newPower != null) {
                         val sharedPref =
-                            activity?.getSharedPreferences("PowerData", Context.MODE_PRIVATE)
+                            activity?.getSharedPreferences("PowerData1", Context.MODE_PRIVATE)
                         val oldPower = sharedPref!!.getFloat("power", 0.34F)
 
                         if (newPower < 0.34) {
@@ -330,7 +330,7 @@ class GardenFragment1 : Fragment() {
                 binding.btnTimeOn.text = "$formattedHour:$formattedMinute"
 
                 // Save the selected time in SharedPreferences
-                val sharedPreferences = activity?.getSharedPreferences("MyAppPrefs", Context.MODE_PRIVATE)
+                val sharedPreferences = activity?.getSharedPreferences("MyAppPrefs1", Context.MODE_PRIVATE)
                 val editor = sharedPreferences!!.edit()
                 editor!!.putString("selectedTimeOn", "$formattedHour:$formattedMinute")
                 editor.apply()
@@ -364,7 +364,7 @@ class GardenFragment1 : Fragment() {
                 endTime = "$formattedHour:$formattedMinute"
 
                 // Save the selected time in SharedPreferences
-                val sharedPreferences = activity?.getSharedPreferences("MyAppPrefs", Context.MODE_PRIVATE)
+                val sharedPreferences = activity?.getSharedPreferences("MyAppPrefs1", Context.MODE_PRIVATE)
                 val editor = sharedPreferences!!.edit()
                 editor!!.putString("selectedTimeOff", "$formattedHour:$formattedMinute")
 
@@ -402,9 +402,9 @@ class GardenFragment1 : Fragment() {
 
         binding.switchAuto.setOnCheckedChangeListener { _, isChecked ->
             // Save the state of the Switch in SharedPreferences
-            val sharedPreferences = activity?.getSharedPreferences("MyPrefs", Context.MODE_PRIVATE)
+            val sharedPreferences = activity?.getSharedPreferences("MyPrefs1", Context.MODE_PRIVATE)
             val editor = sharedPreferences!!.edit()
-            editor!!.putBoolean("switchState", isChecked)
+            editor!!.putBoolean("switchState1", isChecked)
             editor.apply()
             if (isChecked) {
                 // Switch is checked, show contentAuto and hide contentCustomer
@@ -431,7 +431,7 @@ class GardenFragment1 : Fragment() {
 
         binding.switchLed.setOnCheckedChangeListener { _, isChecked ->
             // Save the state of the Switch in SharedPreferences
-            val sharedPreferences = activity?.getSharedPreferences("ledstatus", Context.MODE_PRIVATE)
+            val sharedPreferences = activity?.getSharedPreferences("ledstatus1", Context.MODE_PRIVATE)
             val editor = sharedPreferences!!.edit()
             editor!!.putBoolean("switchLedState", isChecked)
             editor.apply()
@@ -448,7 +448,7 @@ class GardenFragment1 : Fragment() {
                 val switchState = snapshot.getValue<String>()
                 val isChecked = switchState == "true"
                 binding.switchLed.isChecked = isChecked
-                val sharedPreferences = activity?.getSharedPreferences("ledstatus", Context.MODE_PRIVATE)
+                val sharedPreferences = activity!!.getSharedPreferences("ledstatus1", Context.MODE_PRIVATE)
                 val editor = sharedPreferences!!.edit()
                 editor!!.putBoolean("switchLedState", isChecked)
                 editor.apply()
@@ -461,13 +461,13 @@ class GardenFragment1 : Fragment() {
         })
 
         // Retrieve the state of the Switch3 from SharedPreferences
-        val sharedPreferences = activity?.getSharedPreferences("MyPrefs", Context.MODE_PRIVATE)
-        val switchState = sharedPreferences!!.getBoolean("switchState", false) // false is the default value
+        val sharedPreferences = activity?.getSharedPreferences("MyPrefs1", Context.MODE_PRIVATE)
+        val switchState = sharedPreferences!!.getBoolean("switchState1", false) // false is the default value
         binding.switchAuto.isChecked = switchState
 
 // Retrieve the state of Switch4 from SharedPreferences
-        val sharedPreferencesLed = activity?.getSharedPreferences("ledstatus", Context.MODE_PRIVATE)
-        val switchLedState = sharedPreferencesLed!!.getBoolean("switchLedState", false) // false is the default value
+        val sharedPreferencesLed = activity?.getSharedPreferences("ledstatus1", Context.MODE_PRIVATE)
+        val switchLedState = sharedPreferencesLed!!.getBoolean("switchLedState1", false) // false is the default value
         binding.switchLed.isChecked = switchLedState
 
         // Initialize the Firebase database reference
@@ -476,7 +476,7 @@ class GardenFragment1 : Fragment() {
         val edtActiveTime = binding.edtActiveTime
 
         // Retrieve the saved value from Firebase and set it to the EditText
-        databasechild.child("Node1/TimeActive").addListenerForSingleValueEvent(object :
+        databasechild.child("Node2/TimeActive").addListenerForSingleValueEvent(object :
             ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 val activeTime = snapshot.getValue(String::class.java)
@@ -493,7 +493,7 @@ class GardenFragment1 : Fragment() {
                 val input = edtActiveTime.text.toString()
                 if (input.matches(Regex("^([01]\\d|2[0-3]):([0-5]\\d)$"))) {
                     // Save the entered data to Firebase
-                    databasechild.child("Node1/TimeActive").setValue(input)
+                    databasechild.child("Node2/TimeActive").setValue(input)
 
                     // Hide the keyboard and clear focus from the EditText
                     val inputMethodManager = activity?.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
@@ -611,11 +611,11 @@ class GardenFragment1 : Fragment() {
         // Format the interval as HH:mm
         val formattedInterval = String.format("%02d:%02d", hours, minutes)
         val database = FirebaseDatabase.getInstance()
-        val timeActive = database.getReference("Node1/TimeActive")
+        val timeActive = database.getReference("Node2/TimeActive")
         timeActive.setValue(formattedInterval)
 
         // Save the selected time in SharedPreferences
-        val sharedPreferences = activity?.getSharedPreferences("MyAppPrefs", Context.MODE_PRIVATE)
+        val sharedPreferences = activity?.getSharedPreferences("MyAppPrefs1", Context.MODE_PRIVATE)
         val editor = sharedPreferences!!.edit()
         editor.putString("timeActive", formattedInterval)
 
@@ -628,10 +628,10 @@ class GardenFragment1 : Fragment() {
         super.onResume()
 
         // Retrieve the saved time values from SharedPreferences
-        val sharedPreferences = activity?.getSharedPreferences("MyAppPrefs", Context.MODE_PRIVATE)
-        val selectedTimeOn = sharedPreferences!!.getString("selectedTimeOn", "")
-        val selectedTimeOff = sharedPreferences.getString("selectedTimeOff", "")
-        val rstimeActive = sharedPreferences.getString("timeActive", "")
+        val sharedPreferences = activity?.getSharedPreferences("MyAppPrefs1", Context.MODE_PRIVATE)
+        val selectedTimeOn = sharedPreferences!!.getString("selectedTimeOn1", "")
+        val selectedTimeOff = sharedPreferences.getString("selectedTimeOff1", "")
+        val rstimeActive = sharedPreferences.getString("timeActive1", "")
 
         // Display the retrieved time values in your UI
         if (!selectedTimeOn.isNullOrEmpty() && !selectedTimeOff.isNullOrEmpty()) {

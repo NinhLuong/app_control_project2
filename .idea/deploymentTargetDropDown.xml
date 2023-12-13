@@ -10,12 +10,12 @@
               <deviceKey>
                 <Key>
                   <type value="VIRTUAL_DEVICE_PATH" />
-                  <value value="C:\Users\haininh\.android\avd\ResizableAPI_33.avd" />
+                  <value value="C:\Users\haininh\.android\avd\Pixel_8_Pro_API_29.avd" />
                 </Key>
               </deviceKey>
             </Target>
           </targetSelectedWithDropDown>
-          <timeTargetWasSelectedWithDropDown value="2023-12-12T09:47:58.772794800Z" />
+          <timeTargetWasSelectedWithDropDown value="2023-12-13T17:14:16.280590700Z" />
         </State>
       </entry>
     </value>

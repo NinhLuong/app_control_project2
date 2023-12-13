@@ -451,7 +451,7 @@ class GardenFragment : Fragment() {
                 val switchState = snapshot.getValue<String>()
                 val isChecked = switchState == "true"
                 binding.switchLed.isChecked = isChecked
-                val sharedPreferences = activity?.getSharedPreferences("ledstatus", Context.MODE_PRIVATE)
+                val sharedPreferences = activity!!.getSharedPreferences("ledstatus", Context.MODE_PRIVATE)
                 val editor = sharedPreferences!!.edit()
                 editor!!.putBoolean("switchLedState", isChecked)
                 editor.apply()
