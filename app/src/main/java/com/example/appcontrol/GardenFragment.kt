@@ -139,6 +139,7 @@ class GardenFragment : Fragment() {
     val buttonRef = database.getReference("Node1/Button")
     val rainRef = database.getReference("Node1/Rain")
     val openRef = database.getReference("Node1/Open")
+    val sosRef = database.getReference("Node1/SOS")
 
     private val handler = Handler(Looper.getMainLooper())
     private var previousTemp: Float? = null
@@ -171,6 +172,7 @@ class GardenFragment : Fragment() {
                             loraRef.setValue("false")
                         }else if(previousTemp != currentTemp!!.toFloat()){
                             loraRef.setValue("true")
+                            openRef.setValue("true")
                         }
                         previousTemp = currentTemp!!.toFloat()
                     }
@@ -185,7 +187,7 @@ class GardenFragment : Fragment() {
 
         handler.post(runnableCode)
 
-
+/*
 
         power.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
@@ -270,7 +272,7 @@ class GardenFragment : Fragment() {
             override fun onCancelled(error: DatabaseError) {
                 Log.w(TAG, "Failed to read value.", error.toException())
             }
-        })
+        })*/
 
 
 
@@ -287,6 +289,7 @@ class GardenFragment : Fragment() {
                 // Handle error
             }
         })
+
 
         weather.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
@@ -420,7 +423,7 @@ class GardenFragment : Fragment() {
                 // Update the dataset in Firebase
                 ledRef.setValue("false")
                 autoRef.setValue("true")
-                openRef.setValue("true")
+
             }
             else {
                 // Switch is unchecked, show constraintLayout and hide linearLayout
@@ -434,27 +437,46 @@ class GardenFragment : Fragment() {
 
         binding.switchLed.setOnCheckedChangeListener { _, isChecked ->
             // Save the state of the Switch in SharedPreferences
-            val sharedPreferences = activity?.getSharedPreferences("ledstatus", Context.MODE_PRIVATE)
+            /*val sharedPreferences = activity?.getSharedPreferences("ledstatus", Context.MODE_PRIVATE)
             val editor = sharedPreferences!!.edit()
             editor!!.putBoolean("switchLedState", isChecked)
-            editor.apply()
+            editor.apply()*/
             if (isChecked) {
                 ledRef.setValue("true")
+                openRef.setValue("true")
             } else {
                 ledRef.setValue("false")
+                openRef.setValue("true")
             }
         }
 
+        binding.swt.setOnCheckedChangeListener { _, isChecked ->
+
+            if (isChecked) {
+                sosRef.setValue("true")
+                flag.setValue("false")
+                binding.iconActiveDevices.setImageResource(R.drawable.error)
+                binding.textActiveDevices.setText("Wire \nFire")
+            } else {
+                sosRef.setValue("false")
+                flag.setValue("true")
+                binding.iconActiveDevices.setImageResource(R.drawable.woking_device)
+                binding.textActiveDevices.setText("Active \nDevices")
+            }
+        }
 
         ledRef.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
-                val switchState = snapshot.getValue<String>()
+                val switchState = snapshot?.getValue<String>()
                 val isChecked = switchState == "true"
-                binding.switchLed.isChecked = isChecked
-                val sharedPreferences = activity!!.getSharedPreferences("ledstatus", Context.MODE_PRIVATE)
-                val editor = sharedPreferences!!.edit()
-                editor!!.putBoolean("switchLedState", isChecked)
-                editor.apply()
+                binding?.switchLed?.isChecked = isChecked
+                activity?.let {
+                    val sharedPreferences = it.getSharedPreferences("ledstatus", Context.MODE_PRIVATE)
+                    sharedPreferences?.edit()?.apply {
+                        putBoolean("switchLedState", isChecked)
+                        apply()
+                    }
+                }
             }
 
             override fun onCancelled(error: DatabaseError) {

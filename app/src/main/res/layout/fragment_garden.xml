@@ -48,20 +48,20 @@
                     app:layout_constraintTop_toTopOf="parent"
                     app:srcCompat="@drawable/top_background" />
 
-                <!--<TextView
-                    android:id="@+id/header"
+                <TextView
+                    android:id="@+id/titleGaden"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="10dp"
-                    android:text="ĐIỀU KHIỂN CHONG ĐÈN THANH LONG "
+                    android:layout_marginTop="5dp"
+                    android:text="Garden 1"
                     android:textAlignment="center"
                     android:textColor="#FFFFFF"
-                    android:textSize="20sp"
+                    android:textSize="25sp"
                     android:textStyle="bold"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintHorizontal_bias="0.489"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />-->
+                    app:layout_constraintTop_toTopOf="parent" />
 
                <!-- <ImageView
                     android:id="@+id/imageView3"
@@ -97,7 +97,7 @@
                     android:layout_marginStart="40dp"
                     android:layout_marginEnd="40dp"
                     android:layout_marginBottom="10dp"
-                    android:layout_marginTop="10dp"
+                    android:layout_marginTop="30dp"
                     android:background="@drawable/white_top_buttons"
                     android:orientation="horizontal"
                     app:layout_constraintBottom_toTopOf="@+id/linearLayout"
@@ -647,6 +647,15 @@
                             app:layout_constraintStart_toStartOf="parent"
                             app:layout_constraintTop_toTopOf="parent"
                             tools:ignore="UseSwitchCompatOrMaterialXml" />
+
+                        <Switch
+                            android:id="@+id/swt"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text=""
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintTop_toTopOf="parent" />
 
                     </androidx.constraintlayout.widget.ConstraintLayout>
 

@@ -141,6 +141,7 @@ class GardenFragment1 : Fragment() {
     val buttonRef = database.getReference("Node2/Button")
     val rainRef = database.getReference("Node2/Rain")
     val openRef = database.getReference("Node2/Open")
+    val sosRef = database.getReference("Node2/SOS")
 
     private val handler = Handler(Looper.getMainLooper())
     private var previousTemp: Float? = null
@@ -187,7 +188,7 @@ class GardenFragment1 : Fragment() {
 
         handler.post(runnableCode)
 
-        power.addValueEventListener(object : ValueEventListener {
+       /* power.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 val powerVal = dataSnapshot.getValue<String>()
                 var newPower = 0F
@@ -267,8 +268,7 @@ class GardenFragment1 : Fragment() {
                 Log.w(TAG, "Failed to read value.", error.toException())
             }
         })
-
-
+*/
 
 
         humiref.addValueEventListener(object : ValueEventListener {
@@ -332,7 +332,7 @@ class GardenFragment1 : Fragment() {
                 // Save the selected time in SharedPreferences
                 val sharedPreferences = activity?.getSharedPreferences("MyAppPrefs1", Context.MODE_PRIVATE)
                 val editor = sharedPreferences!!.edit()
-                editor!!.putString("selectedTimeOn", "$formattedHour:$formattedMinute")
+                editor!!.putString("selectedTimeOn1", "$formattedHour:$formattedMinute")
                 editor.apply()
 
                 TimeOn.setValue(startTime)
@@ -366,7 +366,7 @@ class GardenFragment1 : Fragment() {
                 // Save the selected time in SharedPreferences
                 val sharedPreferences = activity?.getSharedPreferences("MyAppPrefs1", Context.MODE_PRIVATE)
                 val editor = sharedPreferences!!.edit()
-                editor!!.putString("selectedTimeOff", "$formattedHour:$formattedMinute")
+                editor!!.putString("selectedTimeOff1", "$formattedHour:$formattedMinute")
 
                 editor.apply()
 
@@ -417,7 +417,7 @@ class GardenFragment1 : Fragment() {
                 // Update the dataset in Firebase
                 ledRef.setValue("false")
                 autoRef.setValue("true")
-                openRef.setValue("true")
+
             }
             else {
                 // Switch is unchecked, show constraintLayout and hide linearLayout
@@ -431,27 +431,47 @@ class GardenFragment1 : Fragment() {
 
         binding.switchLed.setOnCheckedChangeListener { _, isChecked ->
             // Save the state of the Switch in SharedPreferences
-            val sharedPreferences = activity?.getSharedPreferences("ledstatus1", Context.MODE_PRIVATE)
+            /*val sharedPreferences = activity?.getSharedPreferences("ledstatus1", Context.MODE_PRIVATE)
             val editor = sharedPreferences!!.edit()
             editor!!.putBoolean("switchLedState", isChecked)
-            editor.apply()
+            editor.apply()*/
             if (isChecked) {
                 ledRef.setValue("true")
+                openRef.setValue("true")
             } else {
                 ledRef.setValue("false")
+                openRef.setValue("true")
             }
         }
 
+        binding.swt.setOnCheckedChangeListener { _, isChecked ->
+
+            if (isChecked) {
+                sosRef.setValue("true")
+                flag.setValue("false")
+                binding.iconActiveDevices.setImageResource(R.drawable.error)
+                binding.textActiveDevices.setText("Wire \nFire")
+            } else {
+                sosRef.setValue("false")
+                flag.setValue("true")
+                binding.iconActiveDevices.setImageResource(R.drawable.woking_device)
+                binding.textActiveDevices.setText("Active \nDevices")
+
+            }
+        }
 
         ledRef.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
-                val switchState = snapshot.getValue<String>()
+                val switchState = snapshot?.getValue<String>()
                 val isChecked = switchState == "true"
-                binding.switchLed.isChecked = isChecked
-                val sharedPreferences = activity!!.getSharedPreferences("ledstatus1", Context.MODE_PRIVATE)
-                val editor = sharedPreferences!!.edit()
-                editor!!.putBoolean("switchLedState", isChecked)
-                editor.apply()
+                binding?.switchLed?.isChecked = isChecked
+                activity?.let {
+                    val sharedPreferences = it.getSharedPreferences("ledstatus1", Context.MODE_PRIVATE)
+                    sharedPreferences?.edit()?.apply {
+                        putBoolean("switchLedState", isChecked)
+                        apply()
+                    }
+                }
             }
 
             override fun onCancelled(error: DatabaseError) {
@@ -542,10 +562,18 @@ class GardenFragment1 : Fragment() {
 
 // Add a listener to listen for data changes
         rainRef.addValueEventListener(object : ValueEventListener {
+            var previousRainStatus: String? = null
+
             override fun onDataChange(snapshot: DataSnapshot) {
                 // Get the data from the snapshot
                 val rainStatus = snapshot.getValue<String>()
                 Log.d("value_rainStatus", "Value is: $rainStatus")
+
+                // Check if the value has changed from "true" to "flash"
+                if (previousRainStatus == "true" && rainStatus == "flash") {
+                    ledRef.setValue("true")
+                    openRef.setValue("true")
+                }
 
                 // Update the UI based on the data
                 when(rainStatus){
@@ -554,7 +582,6 @@ class GardenFragment1 : Fragment() {
                         binding.iconRainyNight.setImageResource(R.drawable.rainy_night)
                         binding.textRainyNight.text = "Rainy \nNight"
                         binding.Led.visibility = View.GONE
-
                     }
 
                     "false" -> {
@@ -568,11 +595,16 @@ class GardenFragment1 : Fragment() {
                         Toast.makeText(context, "Rain status is nulll", Toast.LENGTH_SHORT).show()
                     }
                 }
+
+                // Update the previous rain status
+                previousRainStatus = rainStatus
             }
+
             override fun onCancelled(error: DatabaseError) {
                 // Handle error
             }
         })
+
 
         /*val intent = Intent(context, PowerStatusService::class.java)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {

@@ -10,6 +10,7 @@ import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.fragment.app.Fragment
 import com.google.android.material.navigation.NavigationView
+import com.google.firebase.database.FirebaseDatabase
 
 
 class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
@@ -68,6 +69,25 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
       val navigationView: NavigationView = findViewById(R.id.design_navigation_view)
       val menu = navigationView.menu
       val gardenCount = menu.size() - 3 // Subtract 3 for the existing static items
+      val database = FirebaseDatabase.getInstance()
+      val myRef = database.getReference("Node${gardenCount + 3}")
+      myRef.child("Auto").setValue("false")
+      myRef.child("TimeOn").setValue("false")
+      myRef.child("TimeOff").setValue("false")
+      myRef.child("TimeOff").setValue("false")
+      myRef.child("Flag").setValue("false")
+      myRef.child("Weather").setValue("false")
+      myRef.child("Current").setValue("false")
+      myRef.child("Temp").setValue("false")
+      myRef.child("Humi").setValue("false")
+      myRef.child("TimeLight").setValue("false")
+      myRef.child("Lora").setValue("false")
+      myRef.child("Auto").setValue("false")
+      myRef.child("Led").setValue("false")
+      myRef.child("Button").setValue("false")
+      myRef.child("Open").setValue("false")
+      myRef.child("SOS").setValue("false")
+
       menu.add(R.id.dynamic_group, Menu.NONE, gardenCount, "Garden ${gardenCount + 3}")
          .setIcon(R.drawable.ic_home)
          .isCheckable = true
